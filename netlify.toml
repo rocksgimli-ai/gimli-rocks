@@ -1,0 +1,26 @@
+# Netlify configuration for the Bakar frontend.
+#
+# Only the Next.js app is deployed here. The agent worker is a long-lived
+# process that holds a WebSocket to LiveKit — it cannot run in a serverless
+# function, so it lives on a container host (see docs/DEPLOY.md).
+#
+# Connect the repository root to Netlify; `base` points the build at the app.
+
+[build]
+  base = "frontend"
+  command = "pnpm build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # Secrets-scanning false positives: AGENT_NAME is intentionally embedded in
+  # the client bundle (the app must know which agent to request) and the
+  # project subdomain appears in livekit.toml/docs. Neither is a credential —
+  # the LiveKit API key and secret are NOT in the repo and stay scanned.
+  SECRETS_SCAN_OMIT_KEYS = "AGENT_NAME,LIVEKIT_URL"
+
+# Without this, Netlify publishes .next as static files: pages 404 and the
+# token API doesn't exist. The runtime converts the App Router build into
+# Netlify functions + redirects.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

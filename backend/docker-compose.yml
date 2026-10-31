@@ -1,0 +1,19 @@
+# Bakar agent on a free VPS (Docker Compose).
+# The worker dials OUT to LiveKit on 443 (WSS) and UDP for media —
+# no inbound ports are published, so there is nothing to expose.
+
+services:
+  bakar-agent:
+    build: .
+    image: bakar-agent:latest
+    restart: unless-stopped
+    env_file: .env
+    stop_grace_period: 30s
+    # Measured: ~1.1 GB resident at idle with models loaded; sessions add more.
+    # This limit is an OOM guard, not a target — size the VM at 2 GB minimum.
+    mem_limit: 2g
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

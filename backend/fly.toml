@@ -1,0 +1,29 @@
+# Fly.io configuration for the Bakar agent worker.
+#
+# Build from this directory:
+#   fly launch --no-deploy --copy-config
+#   fly secrets set LIVEKIT_URL=... LIVEKIT_API_KEY=... LIVEKIT_API_SECRET=... \
+#                   DEEPGRAM_API_KEY=... MURF_API_KEY=... SELORA_API_KEY=...
+#   fly deploy
+#
+# There is no [http_service]: the worker dials out to LiveKit and needs no
+# inbound traffic. Adding a service block would just create idle health checks.
+
+app = "bakar-agent"
+primary_region = "sin"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  BAKAR_LLM = "livekit"
+  BAKAR_LLM_MODEL = "openai/gpt-4o-mini"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  # Measured idle footprint with models loaded is ~1.1 GB (see the comment in
+  # docker-compose.yml); 1 GB OOM-killed the worker before it could register.
+  memory = "2gb"
+
+[deploy]
+  strategy = "rolling"

@@ -1,0 +1,9 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[deploy]
+# No startCommand: the image CMD already runs
+# `uv run --no-sync src/agent.py start`.
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
